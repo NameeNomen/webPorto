@@ -221,28 +221,32 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className={`p-4 md:p-6 space-y-4 ${darkMode ? 'bg-black/40' : 'bg-[#2B2B2B]'}`}>
-                    {roles.map((role: string) => (
-                      <div key={`${project.id}-${role}`} className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20">
-                        <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[12px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
-                          ROLE: {role.toUpperCase()}
-                        </div>
-                        <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
-                          {/* OVERLAY GAIB BUAT NGEBLOK KLIK (Gantiin pointer-events-none di iframe) */}
-                          <div className="absolute inset-0 z-10 w-full h-full"></div>
-                          
-                          <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75]">
-                            {/* Hapus pointer-events-none & loading lazy biar iframe gak males render pas refresh/navigasi */}
-                            <iframe 
-                              src={`${baseUrl}?role=${role}`} 
-                              className="w-full h-full border-none" 
-                              title={`Preview ${role}`} 
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                 <div className={`p-4 md:p-6 space-y-4 ${darkMode ? 'bg-black/40' : 'bg-[#2B2B2B]'}`}>
+  {roles.map((role: string) => (
+    <div key={`${project.id}-${role}`} className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20 transform-gpu">
+      
+      <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[12px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
+        ROLE: {role.toUpperCase()}
+      </div>
+      
+      <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
+        {/* OVERLAY GAIB BUAT NGEBLOK KLIK */}
+        <div className="absolute inset-0 z-10 w-full h-full"></div>
+        
+        {/* Container iframe dipaksa render pakai GPU */}
+        <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] will-change-transform transform-gpu">
+          <iframe 
+            src={`${baseUrl}?role=${role}`} 
+            className="w-full h-full border-none" 
+            title={`Preview ${role}`}
+            sandbox="allow-scripts allow-same-origin allow-forms"
+          />
+        </div>
+      </div>
+
+    </div>
+  ))}
+</div>
                 </article>
               );
             })}
