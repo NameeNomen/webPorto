@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 
@@ -29,32 +28,28 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<'native' | 'alt'>('native');
   const [darkMode, setDarkMode] = useState(false);
-  
+ 
   const [branding, setBranding] = useState<BrandingData>({
     photo_url: null,
     description: '',
     is_multi_language: false,
     secondary_lang: 'en'
   });
-
+  
   const [skills, setSkills] = useState<SkillsData>({ hard: [], soft: [] });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Ambil Data Projek
         const { data: projData } = await supabase.from('projects').select('*');
         if (projData) setProjects(projData as Project[]);
 
-        // 2. Ambil Data Branding dari Supabase
         const { data: brandData } = await supabase.from('personal_branding').select('*').maybeSingle();
         if (brandData) setBranding(brandData);
 
-        // 3. Ambil Skills dari LocalStorage
         const savedSkills = localStorage.getItem('porto_skills');
         if (savedSkills) setSkills(JSON.parse(savedSkills));
 
-        // 4. Cek Theme Preference
         const savedTheme = localStorage.getItem('porto_theme');
         if (savedTheme === 'dark') {
           setDarkMode(true);
@@ -91,7 +86,6 @@ export default function HomePage() {
     );
   }
 
-  // Color variables based on theme
   const colors = darkMode ? {
     bg: 'bg-slate-950', text: 'text-slate-100', card: 'bg-slate-900', border: 'border-slate-800',
     primary: 'text-teal-400', accent: 'text-purple-400', muted: 'text-slate-400',
@@ -104,28 +98,25 @@ export default function HomePage() {
 
   return (
     <main className={`min-h-screen transition-colors duration-300 ${colors.bg} ${colors.text} font-['Poppins'] selection:bg-[#FFBACF] selection:text-[#65001E]`}>
-      <div className="max-w-5xl mx-auto pt-4 pl-3 pr-4 pb-3 md:pt-6 md:pl-5 md:pr-6 md:pb-5 space-y-16">
-        
+      {/* Margin Layar ke Kotak (Padding container): Atas 4, Kanan 4, Bawah 3, Kiri 3 */}
+      <div className="max-w-5xl mx-auto pt-4 pr-4 pb-3 pl-3 md:pt-6 md:pr-6 md:pb-5 md:pl-5 space-y-16">
+       
         {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h2 className={`text-[14px] font-bold tracking-widest uppercase mb-1 leading-[1.5] ${colors.accent}`}>Portfolio</h2>
+            <h2 className={`text-[12px] md:text-[14px] font-bold tracking-widest uppercase mb-1 leading-[1.5] ${colors.accent}`}>Portfolio</h2>
             <h1 className={`text-[16px] font-extrabold leading-[1.5] ${colors.primary}`}>
               {branding.description ? 'Creative Developer' : 'My Works'}
             </h1>
           </div>
-
           <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
             <button onClick={toggleTheme} className={`p-2 rounded-full border transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-yellow-400' : 'bg-white/60 border-[#B05D76]/20 text-[#65001E]'}`}>
               {darkMode ? '☀️' : '🌙'}
             </button>
-
-            {/* Language Toggle */}
             {branding.is_multi_language && branding.secondary_lang && (
               <div className={`backdrop-blur-md rounded-full p-1.5 flex gap-1 shadow-sm border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-white/60 border-[#B05D76]/20'}`}>
-                <button onClick={() => setLang('native')} className={`px-5 py-2 rounded-full text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'native' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>ID</button>
-                <button onClick={() => setLang('alt')} className={`px-5 py-2 rounded-full text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'alt' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>{branding.secondary_lang.toUpperCase()}</button>
+                <button onClick={() => setLang('native')} className={`px-5 py-2 rounded-full text-[12px] md:text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'native' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>ID</button>
+                <button onClick={() => setLang('alt')} className={`px-5 py-2 rounded-full text-[12px] md:text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'alt' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>{branding.secondary_lang.toUpperCase()}</button>
               </div>
             )}
           </div>
@@ -134,7 +125,7 @@ export default function HomePage() {
         {/* HERO SECTION */}
         <section className={`relative rounded-[2.5rem] p-8 md:p-12 border overflow-hidden shadow-lg ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-[#FFBACF]/30 shadow-[0_20px_50px_-12px_rgba(101,0,30,0.1)]'}`}>
           {!darkMode && <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#FFBACF]/20 rounded-full blur-3xl pointer-events-none"></div>}
-          
+         
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-10 text-center md:text-left">
             <div className="shrink-0 group">
               <div className={`w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 shadow-xl ring-1 relative ${darkMode ? 'border-slate-700 ring-slate-600' : 'border-white ring-[#B05D76]/20'}`}>
@@ -147,24 +138,25 @@ export default function HomePage() {
                 )}
               </div>
             </div>
-            
+           
             <div className="flex-1 space-y-6">
               <div>
                 <h3 className={`text-[16px] font-bold mb-3 leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
                   {lang === 'native' ? 'Tentang Saya' : 'About Me'}
                 </h3>
-                <p className={`text-[14px] leading-[1.5] text-justify max-w-2xl ${colors.muted}`}>
+                {/* Deskripsi: 14/12 Poppins, jarak antar baris 1.5, text-justify */}
+                <p className={`text-[12px] md:text-[14px] leading-[1.5] text-justify font-['Poppins'] ${colors.muted}`}>
                   {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan."}
                 </p>
               </div>
-              
+             
               {/* SKILLS DISPLAY */}
               {(skills.hard.length > 0 || skills.soft.length > 0) && (
                 <div className="space-y-3 pt-2">
                   {skills.hard.length > 0 && (
                     <div className="flex flex-wrap justify-center md:justify-start gap-2">
                       {skills.hard.map((tech) => (
-                        <span key={tech} className={`px-3 py-1 text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-teal-900/30 text-teal-400 border-teal-800/50' : 'bg-[#FFE9EC] text-[#65001E] border-[#FFBACF]/50'}`}>
+                        <span key={tech} className={`px-3 py-1 text-[12px] md:text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-teal-900/30 text-teal-400 border-teal-800/50' : 'bg-[#FFE9EC] text-[#65001E] border-[#FFBACF]/50'}`}>
                           {tech}
                         </span>
                       ))}
@@ -173,7 +165,7 @@ export default function HomePage() {
                   {skills.soft.length > 0 && (
                     <div className="flex flex-wrap justify-center md:justify-start gap-2">
                       {skills.soft.map((skill) => (
-                        <span key={skill} className={`px-3 py-1 text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-purple-900/30 text-purple-400 border-purple-800/50' : 'bg-purple-50 text-[#B05D76] border-purple-200'}`}>
+                        <span key={skill} className={`px-3 py-1 text-[12px] md:text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-purple-900/30 text-purple-400 border-purple-800/50' : 'bg-purple-50 text-[#B05D76] border-purple-200'}`}>
                           {skill}
                         </span>
                       ))}
@@ -191,11 +183,11 @@ export default function HomePage() {
             <h2 className={`text-[16px] font-bold leading-[1.5] ${colors.primary}`}>
               {lang === 'native' ? 'Projek Pilihan' : 'Selected Works'}
             </h2>
-            <span className={`text-[14px] font-medium hidden md:block leading-[1.5] ${colors.accent}`}>
+            <span className={`text-[12px] md:text-[14px] font-medium hidden md:block leading-[1.5] ${colors.accent}`}>
               {projects.length} {lang === 'native' ? 'Projek' : 'Projects'}
             </span>
           </div>
-          
+         
           <div className="grid gap-12">
             {projects.map((project) => {
               const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
@@ -203,7 +195,7 @@ export default function HomePage() {
               const displayTitle = getText(project, 'title');
               const displayDesc = getText(project, 'description');
               const displayTech = getText(project, 'tech_stack');
-
+              
               return (
                 <article key={project.id} className={`group rounded-[2rem] overflow-hidden shadow-lg border transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 hover:border-teal-900/50' : 'bg-white border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)]'}`}>
                   <div className={`p-8 md:p-10 border-b ${darkMode ? 'border-slate-800' : 'border-[#FFE9EC]'}`}>
@@ -212,14 +204,19 @@ export default function HomePage() {
                         <h3 className={`text-[16px] font-bold mb-2 group-hover:text-teal-400 transition-colors leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
                           {displayTitle}
                         </h3>
-                        <p className={`text-[14px] leading-[1.5] text-justify max-w-3xl ${colors.muted}`}>
+                        {/* Deskripsi: 14/12 Poppins, jarak antar baris 1.5, text-justify */}
+                        <p className={`text-[12px] md:text-[14px] leading-[1.5] text-justify font-['Poppins'] ${colors.muted}`}>
                           {displayDesc}
                         </p>
                       </div>
-                      <div className="shrink-0 mt-2 md:mt-0">
-                         <span className={`inline-block px-4 py-1.5 text-[14px] font-bold rounded-full leading-[1.5] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#2B2B2B] text-[#FFE9EC]'}`}>
-                           {displayTech}
-                         </span>
+                      
+                      {/* Alat/Tech Stack dipisah dan nggak dempet pakai flex-wrap & gap-2 */}
+                      <div className="shrink-0 mt-3 md:mt-0 flex flex-wrap gap-2 justify-start md:justify-end">
+                        {displayTech.split(',').map((tech, index) => (
+                           <span key={index} className={`inline-block px-3 py-1 text-[12px] md:text-[14px] font-bold rounded-full leading-[1.5] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#2B2B2B] text-[#FFE9EC]'}`}>
+                             {tech.trim()}
+                           </span>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -231,8 +228,16 @@ export default function HomePage() {
                           ROLE: {role.toUpperCase()}
                         </div>
                         <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
-                          <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] pointer-events-none">
-                            <iframe src={`${baseUrl}?role=${role}`} className="w-full h-full border-none" loading="lazy" title={`Preview ${role}`} />
+                          {/* OVERLAY GAIB BUAT NGEBLOK KLIK (Gantiin pointer-events-none di iframe) */}
+                          <div className="absolute inset-0 z-10 w-full h-full"></div>
+                          
+                          <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75]">
+                            {/* Hapus pointer-events-none & loading lazy biar iframe gak males render pas refresh/navigasi */}
+                            <iframe 
+                              src={`${baseUrl}?role=${role}`} 
+                              className="w-full h-full border-none" 
+                              title={`Preview ${role}`} 
+                            />
                           </div>
                         </div>
                       </div>
@@ -246,7 +251,7 @@ export default function HomePage() {
 
         {/* FOOTER */}
         <footer className={`pt-12 text-center border-t ${darkMode ? 'border-slate-800 text-slate-500' : 'border-[#B05D76]/20 text-[#B05D76]'}`}>
-          <p className="text-[14px] font-medium leading-[1.5]">
+          <p className="text-[12px] md:text-[14px] font-medium leading-[1.5]">
             © {new Date().getFullYear()} Portfolio. Built with precision and passion.
           </p>
         </footer>
