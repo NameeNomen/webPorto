@@ -63,16 +63,24 @@ export default function DashboardAdmin() {
 
   // --- LOGIKA LOCAL STORAGE BRANDING ---
   const loadLocalBranding = () => {
-    const saved = localStorage.getItem('user_personal_branding');
-    if (saved) {
-      setBranding(JSON.parse(saved));
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('user_personal_branding');
+      if (saved) {
+        try {
+          setBranding(JSON.parse(saved));
+        } catch (e) {
+          console.error("Error parsing branding data", e);
+        }
+      }
     }
   };
 
   const saveLocalBranding = (newData: Partial<PersonalBranding>) => {
     const updated = { ...branding, ...newData };
     setBranding(updated);
-    localStorage.setItem('user_personal_branding', JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user_personal_branding', JSON.stringify(updated));
+    }
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,12 +166,16 @@ export default function DashboardAdmin() {
     setTechStack(project.tech_stack);
     setDemoUrl(project.demo_url);
     
-    // Load translations jika ada
-    if (project.translations && project.translations[branding.secondaryLang]) {
-      const t = project.translations[branding.secondaryLang];
-      setTransTitle(t.title);
-      setTransDesc(t.description);
-      setTransTech(t.tech_stack);
+    // PERBAIKAN ERROR TYPESCRIPT DI SINI
+    // Kita cast 'translations' ke 'any' sementara agar bisa diakses dengan dynamic key
+    const translations = project.translations as any;
+    const currentLang = branding.secondaryLang;
+
+    if (translations && translations[currentLang]) {
+      const t = translations[currentLang];
+      setTransTitle(t.title || '');
+      setTransDesc(t.description || '');
+      setTransTech(t.tech_stack || '');
     } else {
       setTransTitle('');
       setTransDesc('');
@@ -184,7 +196,7 @@ export default function DashboardAdmin() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Plugin Code Constants (Tetap sama seperti sebelumnya)
+  // Plugin Code Constants
   const pluginCode = `document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
     const currentRole = urlParams.get('role');
