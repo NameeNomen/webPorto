@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 
-// Pastikan font Poppins sudah di-load di layout.tsx atau globals.css
-// @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 interface Project {
   id: string;
   title: string;
@@ -22,10 +19,17 @@ interface BrandingData {
   secondary_lang: string;
 }
 
+interface SkillsData {
+  hard: string[];
+  soft: string[];
+}
+
 export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<'native' | 'alt'>('native');
+  const [darkMode, setDarkMode] = useState(false);
+  
   const [branding, setBranding] = useState<BrandingData>({
     photo_url: null,
     description: '',
@@ -33,20 +37,44 @@ export default function HomePage() {
     secondary_lang: 'en'
   });
 
+  const [skills, setSkills] = useState<SkillsData>({ hard: [], soft: [] });
+
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Ambil Data Projek
-      const { data: projData } = await supabase.from('projects').select('*');
-      if (projData) setProjects(projData as Project[]);
+      try {
+        // 1. Ambil Data Projek
+        const { data: projData } = await supabase.from('projects').select('*');
+        if (projData) setProjects(projData as Project[]);
 
-      // 2. Ambil Data Branding dari Supabase (Sinkron dengan Admin)
-      const { data: brandData } = await supabase.from('personal_branding').select('*').single();
-      if (brandData) setBranding(brandData);
-      
-      setLoading(false);
+        // 2. Ambil Data Branding dari Supabase
+        const { data: brandData } = await supabase.from('personal_branding').select('*').maybeSingle();
+        if (brandData) setBranding(brandData);
+
+        // 3. Ambil Skills dari LocalStorage
+        const savedSkills = localStorage.getItem('porto_skills');
+        if (savedSkills) setSkills(JSON.parse(savedSkills));
+
+        // 4. Cek Theme Preference
+        const savedTheme = localStorage.getItem('porto_theme');
+        if (savedTheme === 'dark') {
+          setDarkMode(true);
+          document.documentElement.classList.add('dark');
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);
+
+  const toggleTheme = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('porto_theme', newMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', newMode);
+  };
 
   const getText = (project: Project, field: 'title' | 'description' | 'tech_stack') => {
     if (lang === 'alt' && branding.is_multi_language && project.translations?.[branding.secondary_lang]) {
@@ -57,59 +85,63 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFE9EC] flex items-center justify-center font-['Poppins']">
-        <div className="w-8 h-8 border-4 border-[#65001E] border-t-transparent rounded-full animate-spin"></div>
+      <div className={`min-h-screen flex items-center justify-center font-['Poppins'] ${darkMode ? 'bg-slate-950' : 'bg-[#FFE9EC]'}`}>
+        <div className={`w-8 h-8 border-4 border-t-transparent rounded-full animate-spin ${darkMode ? 'border-teal-500' : 'border-[#65001E]'}`}></div>
       </div>
     );
   }
 
+  // Color variables based on theme
+  const colors = darkMode ? {
+    bg: 'bg-slate-950', text: 'text-slate-100', card: 'bg-slate-900', border: 'border-slate-800',
+    primary: 'text-teal-400', accent: 'text-purple-400', muted: 'text-slate-400',
+    badgeBg: 'bg-slate-800', badgeBorder: 'border-slate-700'
+  } : {
+    bg: 'bg-[#FFE9EC]', text: 'text-[#2B2B2B]', card: 'bg-white', border: 'border-[#FFBACF]/30',
+    primary: 'text-[#65001E]', accent: 'text-[#B05D76]', muted: 'text-[#2B2B2B]/70',
+    badgeBg: 'bg-[#FFE9EC]', badgeBorder: 'border-[#FFBACF]/50'
+  };
+
   return (
-    <main className="min-h-screen bg-[#FFE9EC] text-[#2B2B2B] font-['Poppins'] selection:bg-[#FFBACF] selection:text-[#65001E]">
-      {/* MARGIN LAYOUT: Atas 4, Kiri 3, Bawah 3, Kanan 4 */}
+    <main className={`min-h-screen transition-colors duration-300 ${colors.bg} ${colors.text} font-['Poppins'] selection:bg-[#FFBACF] selection:text-[#65001E]`}>
       <div className="max-w-5xl mx-auto pt-4 pl-3 pr-4 pb-3 md:pt-6 md:pl-5 md:pr-6 md:pb-5 space-y-16">
         
-        {/* HEADER & LANGUAGE SWITCHER */}
+        {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h2 className="text-[12px] font-bold tracking-widest text-[#B05D76] uppercase mb-1 leading-[1.5]">Portfolio</h2>
-            <h1 className="text-[14px] font-extrabold text-[#65001E] leading-[1.5]">
+            <h2 className={`text-[14px] font-bold tracking-widest uppercase mb-1 leading-[1.5] ${colors.accent}`}>Portfolio</h2>
+            <h1 className={`text-[16px] font-extrabold leading-[1.5] ${colors.primary}`}>
               {branding.description ? 'Creative Developer' : 'My Works'}
             </h1>
           </div>
 
-          {branding.is_multi_language && branding.secondary_lang && (
-            <div className="bg-white/60 backdrop-blur-md border border-[#B05D76]/20 rounded-full p-1.5 flex gap-1 shadow-sm">
-              <button 
-                onClick={() => setLang('native')}
-                className={`px-5 py-2 rounded-full text-[12px] font-bold transition-all duration-300 leading-[1.5] ${
-                  lang === 'native' ? 'bg-[#65001E] text-[#FFE9EC] shadow-md' : 'text-[#B05D76] hover:bg-[#FFBACF]/30'
-                }`}
-              >
-                ID
-              </button>
-              <button 
-                onClick={() => setLang('alt')}
-                className={`px-5 py-2 rounded-full text-[12px] font-bold transition-all duration-300 leading-[1.5] ${
-                  lang === 'alt' ? 'bg-[#65001E] text-[#FFE9EC] shadow-md' : 'text-[#B05D76] hover:bg-[#FFBACF]/30'
-                }`}
-              >
-                {branding.secondary_lang.toUpperCase()}
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button onClick={toggleTheme} className={`p-2 rounded-full border transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-yellow-400' : 'bg-white/60 border-[#B05D76]/20 text-[#65001E]'}`}>
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+
+            {/* Language Toggle */}
+            {branding.is_multi_language && branding.secondary_lang && (
+              <div className={`backdrop-blur-md rounded-full p-1.5 flex gap-1 shadow-sm border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-white/60 border-[#B05D76]/20'}`}>
+                <button onClick={() => setLang('native')} className={`px-5 py-2 rounded-full text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'native' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>ID</button>
+                <button onClick={() => setLang('alt')} className={`px-5 py-2 rounded-full text-[14px] font-bold transition-all duration-300 leading-[1.5] ${lang === 'alt' ? (darkMode ? 'bg-teal-500 text-slate-950' : 'bg-[#65001E] text-[#FFE9EC]') : (darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-[#B05D76] hover:bg-[#FFBACF]/30')}`}>{branding.secondary_lang.toUpperCase()}</button>
+              </div>
+            )}
+          </div>
         </header>
 
-        {/* HERO SECTION - PERSONAL BRANDING */}
-        <section className="relative bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_-12px_rgba(101,0,30,0.1)] border border-[#FFBACF]/30 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#FFBACF]/20 rounded-full blur-3xl pointer-events-none"></div>
+        {/* HERO SECTION */}
+        <section className={`relative rounded-[2.5rem] p-8 md:p-12 border overflow-hidden shadow-lg ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-[#FFBACF]/30 shadow-[0_20px_50px_-12px_rgba(101,0,30,0.1)]'}`}>
+          {!darkMode && <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#FFBACF]/20 rounded-full blur-3xl pointer-events-none"></div>}
           
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-10 text-center md:text-left">
             <div className="shrink-0 group">
-              <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-[#B05D76]/20 relative">
+              <div className={`w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 shadow-xl ring-1 relative ${darkMode ? 'border-slate-700 ring-slate-600' : 'border-white ring-[#B05D76]/20'}`}>
                 {branding.photo_url ? (
                   <img src={branding.photo_url} alt="Profile" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 ) : (
-                  <div className="w-full h-full bg-[#FFE9EC] flex items-center justify-center text-[#B05D76]">
+                  <div className={`w-full h-full flex items-center justify-center ${darkMode ? 'bg-slate-800 text-slate-600' : 'bg-[#FFE9EC] text-[#B05D76]'}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
                 )}
@@ -118,33 +150,48 @@ export default function HomePage() {
             
             <div className="flex-1 space-y-6">
               <div>
-                <h3 className="text-[14px] font-bold text-[#2B2B2B] mb-3 leading-[1.5]">
+                <h3 className={`text-[16px] font-bold mb-3 leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
                   {lang === 'native' ? 'Tentang Saya' : 'About Me'}
                 </h3>
-                {/* TEXT JUSTIFY & LEADING 1.5 SESUAI REQUEST */}
-                <p className="text-[12px] text-[#2B2B2B]/80 leading-[1.5] text-justify max-w-2xl">
-                  {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan. Jelajahi projek-projek pilihan saya di bawah ini."}
+                <p className={`text-[14px] leading-[1.5] text-justify max-w-2xl ${colors.muted}`}>
+                  {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan."}
                 </p>
               </div>
               
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
-                {['React', 'Next.js', 'TypeScript', 'Supabase'].map((tech) => (
-                  <span key={tech} className="px-3 py-1 bg-[#FFE9EC] text-[#65001E] text-[12px] font-bold rounded-lg border border-[#FFBACF]/50 leading-[1.5]">
-                    {tech}
-                  </span>
-                ))}
-              </div>
+              {/* SKILLS DISPLAY */}
+              {(skills.hard.length > 0 || skills.soft.length > 0) && (
+                <div className="space-y-3 pt-2">
+                  {skills.hard.length > 0 && (
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                      {skills.hard.map((tech) => (
+                        <span key={tech} className={`px-3 py-1 text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-teal-900/30 text-teal-400 border-teal-800/50' : 'bg-[#FFE9EC] text-[#65001E] border-[#FFBACF]/50'}`}>
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {skills.soft.length > 0 && (
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                      {skills.soft.map((skill) => (
+                        <span key={skill} className={`px-3 py-1 text-[14px] font-bold rounded-lg border leading-[1.5] ${darkMode ? 'bg-purple-900/30 text-purple-400 border-purple-800/50' : 'bg-purple-50 text-[#B05D76] border-purple-200'}`}>
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* PROJECTS GALLERY */}
         <div className="space-y-10">
-          <div className="flex items-end justify-between border-b border-[#B05D76]/20 pb-4">
-            <h2 className="text-[14px] font-bold text-[#65001E] leading-[1.5]">
+          <div className={`flex items-end justify-between pb-4 border-b ${darkMode ? 'border-slate-800' : 'border-[#B05D76]/20'}`}>
+            <h2 className={`text-[16px] font-bold leading-[1.5] ${colors.primary}`}>
               {lang === 'native' ? 'Projek Pilihan' : 'Selected Works'}
             </h2>
-            <span className="text-[12px] text-[#B05D76] font-medium hidden md:block leading-[1.5]">
+            <span className={`text-[14px] font-medium hidden md:block leading-[1.5] ${colors.accent}`}>
               {projects.length} {lang === 'native' ? 'Projek' : 'Projects'}
             </span>
           </div>
@@ -158,30 +205,29 @@ export default function HomePage() {
               const displayTech = getText(project, 'tech_stack');
 
               return (
-                <article key={project.id} className="group bg-white rounded-[2rem] overflow-hidden shadow-lg border border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)] transition-all duration-300">
-                  <div className="p-8 md:p-10 border-b border-[#FFE9EC]">
+                <article key={project.id} className={`group rounded-[2rem] overflow-hidden shadow-lg border transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 hover:border-teal-900/50' : 'bg-white border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)]'}`}>
+                  <div className={`p-8 md:p-10 border-b ${darkMode ? 'border-slate-800' : 'border-[#FFE9EC]'}`}>
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
                       <div className="flex-1">
-                        <h3 className="text-[14px] font-bold text-[#2B2B2B] mb-2 group-hover:text-[#65001E] transition-colors leading-[1.5]">
+                        <h3 className={`text-[16px] font-bold mb-2 group-hover:text-teal-400 transition-colors leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
                           {displayTitle}
                         </h3>
-                        {/* TEXT JUSTIFY & LEADING 1.5 UNTUK DESKRIPSI PROJEK */}
-                        <p className="text-[12px] text-[#2B2B2B]/70 leading-[1.5] text-justify max-w-3xl">
+                        <p className={`text-[14px] leading-[1.5] text-justify max-w-3xl ${colors.muted}`}>
                           {displayDesc}
                         </p>
                       </div>
                       <div className="shrink-0 mt-2 md:mt-0">
-                         <span className="inline-block px-4 py-1.5 bg-[#2B2B2B] text-[#FFE9EC] text-[12px] font-bold rounded-full leading-[1.5]">
+                         <span className={`inline-block px-4 py-1.5 text-[14px] font-bold rounded-full leading-[1.5] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#2B2B2B] text-[#FFE9EC]'}`}>
                            {displayTech}
                          </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#2B2B2B] p-4 md:p-6 space-y-4">
+                  <div className={`p-4 md:p-6 space-y-4 ${darkMode ? 'bg-black/40' : 'bg-[#2B2B2B]'}`}>
                     {roles.map((role: string) => (
                       <div key={`${project.id}-${role}`} className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20">
-                        <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[10px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
+                        <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[12px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
                           ROLE: {role.toUpperCase()}
                         </div>
                         <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
@@ -199,8 +245,8 @@ export default function HomePage() {
         </div>
 
         {/* FOOTER */}
-        <footer className="pt-12 border-t border-[#B05D76]/20 text-center">
-          <p className="text-[#B05D76] text-[12px] font-medium leading-[1.5]">
+        <footer className={`pt-12 text-center border-t ${darkMode ? 'border-slate-800 text-slate-500' : 'border-[#B05D76]/20 text-[#B05D76]'}`}>
+          <p className="text-[14px] font-medium leading-[1.5]">
             © {new Date().getFullYear()} Portfolio. Built with precision and passion.
           </p>
         </footer>
