@@ -240,8 +240,8 @@ export default function DashboardAdmin() {
         {/* TABS */}
         <nav className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
           {[
-            { id: 'manage', label: ' KELOLA PROJEK', color: 'teal' },
-            { id: 'branding', label: '👤 PERSONAL BRANDING', color: 'purple' },
+            { id: 'manage', label: '📦 KELOLA PROJEK', color: 'teal' },
+            { id: 'branding', label: ' PERSONAL BRANDING', color: 'purple' },
             { id: 'tutorial', label: '⚙️ PANDUAN PLUGIN', color: 'emerald' },
           ].map((tab) => (
             <button
@@ -265,7 +265,7 @@ export default function DashboardAdmin() {
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl sticky top-6">
                 <h2 className="text-sm font-bold text-slate-300 mb-5 flex items-center gap-2">
-                  {editingId ? '⚡ Edit Projek' : '➕ Tambah Projek'}
+                  {editingId ? ' Edit Projek' : '➕ Tambah Projek'}
                 </h2>
                 
                 {branding.is_multi_language && (

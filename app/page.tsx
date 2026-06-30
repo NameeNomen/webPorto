@@ -1,6 +1,10 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
+
+// Pastikan font Poppins sudah di-load di layout.tsx atau globals.css
+// @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 interface Project {
   id: string;
@@ -53,21 +57,22 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFE9EC] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFE9EC] flex items-center justify-center font-['Poppins']">
         <div className="w-8 h-8 border-4 border-[#65001E] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FFE9EC] text-[#2B2B2B] font-sans selection:bg-[#FFBACF] selection:text-[#65001E]">
-      <div className="max-w-5xl mx-auto px-6 py-12 md:py-20 space-y-20">
+    <main className="min-h-screen bg-[#FFE9EC] text-[#2B2B2B] font-['Poppins'] selection:bg-[#FFBACF] selection:text-[#65001E]">
+      {/* MARGIN LAYOUT: Atas 4, Kiri 3, Bawah 3, Kanan 4 */}
+      <div className="max-w-5xl mx-auto pt-4 pl-3 pr-4 pb-3 md:pt-6 md:pl-5 md:pr-6 md:pb-5 space-y-16">
         
         {/* HEADER & LANGUAGE SWITCHER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h2 className="text-sm font-bold tracking-widest text-[#B05D76] uppercase mb-1">Portfolio</h2>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#65001E] leading-tight">
+            <h2 className="text-[12px] font-bold tracking-widest text-[#B05D76] uppercase mb-1 leading-[1.5]">Portfolio</h2>
+            <h1 className="text-[14px] font-extrabold text-[#65001E] leading-[1.5]">
               {branding.description ? 'Creative Developer' : 'My Works'}
             </h1>
           </div>
@@ -76,7 +81,7 @@ export default function HomePage() {
             <div className="bg-white/60 backdrop-blur-md border border-[#B05D76]/20 rounded-full p-1.5 flex gap-1 shadow-sm">
               <button 
                 onClick={() => setLang('native')}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${
+                className={`px-5 py-2 rounded-full text-[12px] font-bold transition-all duration-300 leading-[1.5] ${
                   lang === 'native' ? 'bg-[#65001E] text-[#FFE9EC] shadow-md' : 'text-[#B05D76] hover:bg-[#FFBACF]/30'
                 }`}
               >
@@ -84,7 +89,7 @@ export default function HomePage() {
               </button>
               <button 
                 onClick={() => setLang('alt')}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${
+                className={`px-5 py-2 rounded-full text-[12px] font-bold transition-all duration-300 leading-[1.5] ${
                   lang === 'alt' ? 'bg-[#65001E] text-[#FFE9EC] shadow-md' : 'text-[#B05D76] hover:bg-[#FFBACF]/30'
                 }`}
               >
@@ -94,7 +99,7 @@ export default function HomePage() {
           )}
         </header>
 
-        {/* HERO SECTION */}
+        {/* HERO SECTION - PERSONAL BRANDING */}
         <section className="relative bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_-12px_rgba(101,0,30,0.1)] border border-[#FFBACF]/30 overflow-hidden">
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#FFBACF]/20 rounded-full blur-3xl pointer-events-none"></div>
           
@@ -113,17 +118,18 @@ export default function HomePage() {
             
             <div className="flex-1 space-y-6">
               <div>
-                <h3 className="text-2xl md:text-3xl font-bold text-[#2B2B2B] mb-3">
+                <h3 className="text-[14px] font-bold text-[#2B2B2B] mb-3 leading-[1.5]">
                   {lang === 'native' ? 'Tentang Saya' : 'About Me'}
                 </h3>
-                <p className="text-[#2B2B2B]/80 text-base md:text-lg leading-relaxed max-w-2xl">
-                  {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan."}
+                {/* TEXT JUSTIFY & LEADING 1.5 SESUAI REQUEST */}
+                <p className="text-[12px] text-[#2B2B2B]/80 leading-[1.5] text-justify max-w-2xl">
+                  {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan. Jelajahi projek-projek pilihan saya di bawah ini."}
                 </p>
               </div>
               
               <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
                 {['React', 'Next.js', 'TypeScript', 'Supabase'].map((tech) => (
-                  <span key={tech} className="px-3 py-1 bg-[#FFE9EC] text-[#65001E] text-xs font-bold rounded-lg border border-[#FFBACF]/50">
+                  <span key={tech} className="px-3 py-1 bg-[#FFE9EC] text-[#65001E] text-[12px] font-bold rounded-lg border border-[#FFBACF]/50 leading-[1.5]">
                     {tech}
                   </span>
                 ))}
@@ -135,10 +141,10 @@ export default function HomePage() {
         {/* PROJECTS GALLERY */}
         <div className="space-y-10">
           <div className="flex items-end justify-between border-b border-[#B05D76]/20 pb-4">
-            <h2 className="text-3xl font-bold text-[#65001E]">
+            <h2 className="text-[14px] font-bold text-[#65001E] leading-[1.5]">
               {lang === 'native' ? 'Projek Pilihan' : 'Selected Works'}
             </h2>
-            <span className="text-sm text-[#B05D76] font-medium hidden md:block">
+            <span className="text-[12px] text-[#B05D76] font-medium hidden md:block leading-[1.5]">
               {projects.length} {lang === 'native' ? 'Projek' : 'Projects'}
             </span>
           </div>
@@ -155,16 +161,17 @@ export default function HomePage() {
                 <article key={project.id} className="group bg-white rounded-[2rem] overflow-hidden shadow-lg border border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)] transition-all duration-300">
                   <div className="p-8 md:p-10 border-b border-[#FFE9EC]">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-                      <div>
-                        <h3 className="text-2xl font-bold text-[#2B2B2B] mb-2 group-hover:text-[#65001E] transition-colors">
+                      <div className="flex-1">
+                        <h3 className="text-[14px] font-bold text-[#2B2B2B] mb-2 group-hover:text-[#65001E] transition-colors leading-[1.5]">
                           {displayTitle}
                         </h3>
-                        <p className="text-[#2B2B2B]/70 leading-relaxed max-w-3xl">
+                        {/* TEXT JUSTIFY & LEADING 1.5 UNTUK DESKRIPSI PROJEK */}
+                        <p className="text-[12px] text-[#2B2B2B]/70 leading-[1.5] text-justify max-w-3xl">
                           {displayDesc}
                         </p>
                       </div>
-                      <div className="shrink-0">
-                         <span className="inline-block px-4 py-1.5 bg-[#2B2B2B] text-[#FFE9EC] text-xs font-bold rounded-full">
+                      <div className="shrink-0 mt-2 md:mt-0">
+                         <span className="inline-block px-4 py-1.5 bg-[#2B2B2B] text-[#FFE9EC] text-[12px] font-bold rounded-full leading-[1.5]">
                            {displayTech}
                          </span>
                       </div>
@@ -174,7 +181,7 @@ export default function HomePage() {
                   <div className="bg-[#2B2B2B] p-4 md:p-6 space-y-4">
                     {roles.map((role: string) => (
                       <div key={`${project.id}-${role}`} className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20">
-                        <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[10px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg">
+                        <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[10px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
                           ROLE: {role.toUpperCase()}
                         </div>
                         <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
@@ -193,7 +200,7 @@ export default function HomePage() {
 
         {/* FOOTER */}
         <footer className="pt-12 border-t border-[#B05D76]/20 text-center">
-          <p className="text-[#B05D76] text-sm font-medium">
+          <p className="text-[#B05D76] text-[12px] font-medium leading-[1.5]">
             © {new Date().getFullYear()} Portfolio. Built with precision and passion.
           </p>
         </footer>
