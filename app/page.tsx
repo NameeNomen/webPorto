@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-
+import Link from 'next/link';
 export default function HomePage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [lang, setLang] = useState<'native' | 'alt'>('native');
