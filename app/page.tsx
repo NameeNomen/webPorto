@@ -23,6 +23,93 @@ interface SkillsData {
   soft: string[];
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// KOMPONEN KHUSUS: Mengurus perputaran iframe otomatis (Dinamis dari Database)
+// ══════════════════════════════════════════════════════════════════════════
+const ProjectItem = ({ project, darkMode, colors, lang, branding, getText }: any) => {
+  // Ambil data dinamis dari database. Kalau ga ada parameter ?roles=, fallback ke ['admin']
+  const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
+  const baseUrl = project.demo_url.split('?')[0];
+  
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    // Kalau rolenya cuma 1, timer ga usah dijalanin.
+    if (roles.length <= 1) return;
+    
+    // Timer 40 Detik buat ganti giliran.
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % roles.length);
+    }, 40000); 
+
+    return () => clearInterval(timer);
+  }, [roles.length]);
+
+  const activeRole = roles[currentIndex];
+  const displayTitle = getText(project, 'title');
+  const displayDesc = getText(project, 'description');
+  const displayTech = getText(project, 'tech_stack');
+
+  return (
+    <article className={`group rounded-[2rem] overflow-hidden shadow-lg border transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 hover:border-teal-900/50' : 'bg-white border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)]'}`}>
+      <div className={`p-8 md:p-10 border-b ${darkMode ? 'border-slate-800' : 'border-[#FFE9EC]'}`}>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+          <div className="flex-1">
+            <h3 className={`text-[16px] font-bold mb-2 group-hover:text-teal-400 transition-colors leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
+              {displayTitle}
+            </h3>
+            <p className={`text-[12px] md:text-[14px] leading-[1.5] text-justify font-['Poppins'] ${colors.muted}`}>
+              {displayDesc}
+            </p>
+          </div>
+          
+          <div className="shrink-0 mt-3 md:mt-0 flex flex-wrap gap-2 justify-start md:justify-end">
+            {displayTech.split(',').map((tech: string, index: number) => (
+               <span key={index} className={`inline-block px-3 py-1 text-[12px] md:text-[14px] font-bold rounded-full leading-[1.5] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#2B2B2B] text-[#FFE9EC]'}`}>
+                 {tech.trim()}
+               </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className={`p-4 md:p-6 space-y-4 ${darkMode ? 'bg-black/40' : 'bg-[#2B2B2B]'}`}>
+        <div className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20 transform-gpu">
+          
+          <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[12px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5] flex items-center gap-2">
+            <span>ROLE: {activeRole.toUpperCase()}</span>
+            {roles.length > 1 && (
+                <span className="opacity-60 text-[10px] bg-black/30 px-2 py-0.5 rounded-full">
+                    ({currentIndex + 1}/{roles.length})
+                </span>
+            )}
+          </div>
+          
+          <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
+            {/* OVERLAY GAIB BUAT NGEBLOK KLIK */}
+            <div className="absolute inset-0 z-10 w-full h-full"></div>
+            
+            <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] will-change-transform transform-gpu transition-opacity duration-300">
+              {/* DI SINI CUMA ADA 1 IFRAME! Ganti URL-nya otomatis tiap 40 detik */}
+              <iframe 
+                key={activeRole} 
+                src={`${baseUrl}?current_role=${activeRole}`} 
+                className="w-full h-full border-none" 
+                title={`Preview ${activeRole}`}
+                sandbox="allow-scripts allow-same-origin allow-forms"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// HALAMAN UTAMA (HOME PAGE)
+// ══════════════════════════════════════════════════════════════════════════
 export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,9 +185,8 @@ export default function HomePage() {
 
   return (
     <main className={`min-h-screen transition-colors duration-300 ${colors.bg} ${colors.text} font-['Poppins'] selection:bg-[#FFBACF] selection:text-[#65001E]`}>
-      {/* Margin Layar ke Kotak (Padding container): Atas 4, Kanan 4, Bawah 3, Kiri 3 */}
       <div className="max-w-5xl mx-auto pt-4 pr-4 pb-3 pl-3 md:pt-6 md:pr-6 md:pb-5 md:pl-5 space-y-16">
-       
+        
         {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
@@ -125,7 +211,7 @@ export default function HomePage() {
         {/* HERO SECTION */}
         <section className={`relative rounded-[2.5rem] p-8 md:p-12 border overflow-hidden shadow-lg ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-[#FFBACF]/30 shadow-[0_20px_50px_-12px_rgba(101,0,30,0.1)]'}`}>
           {!darkMode && <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#FFBACF]/20 rounded-full blur-3xl pointer-events-none"></div>}
-         
+          
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-10 text-center md:text-left">
             <div className="shrink-0 group">
               <div className={`w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 shadow-xl ring-1 relative ${darkMode ? 'border-slate-700 ring-slate-600' : 'border-white ring-[#B05D76]/20'}`}>
@@ -138,18 +224,17 @@ export default function HomePage() {
                 )}
               </div>
             </div>
-           
+            
             <div className="flex-1 space-y-6">
               <div>
                 <h3 className={`text-[16px] font-bold mb-3 leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
                   {lang === 'native' ? 'Tentang Saya' : 'About Me'}
                 </h3>
-                {/* Deskripsi: 14/12 Poppins, jarak antar baris 1.5, text-justify */}
                 <p className={`text-[12px] md:text-[14px] leading-[1.5] text-justify font-['Poppins'] ${colors.muted}`}>
                   {branding.description || "Seorang pengembang yang berdedikasi menciptakan solusi digital yang efisien dan elegan."}
                 </p>
               </div>
-             
+              
               {/* SKILLS DISPLAY */}
               {(skills.hard.length > 0 || skills.soft.length > 0) && (
                 <div className="space-y-3 pt-2">
@@ -187,69 +272,19 @@ export default function HomePage() {
               {projects.length} {lang === 'native' ? 'Projek' : 'Projects'}
             </span>
           </div>
-         
+          
           <div className="grid gap-12">
-            {projects.map((project) => {
-              const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
-              const baseUrl = project.demo_url.split('?')[0];
-              const displayTitle = getText(project, 'title');
-              const displayDesc = getText(project, 'description');
-              const displayTech = getText(project, 'tech_stack');
-              
-              return (
-                <article key={project.id} className={`group rounded-[2rem] overflow-hidden shadow-lg border transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 hover:border-teal-900/50' : 'bg-white border-[#FFBACF]/20 hover:shadow-[0_20px_40px_-10px_rgba(101,0,30,0.15)]'}`}>
-                  <div className={`p-8 md:p-10 border-b ${darkMode ? 'border-slate-800' : 'border-[#FFE9EC]'}`}>
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-                      <div className="flex-1">
-                        <h3 className={`text-[16px] font-bold mb-2 group-hover:text-teal-400 transition-colors leading-[1.5] ${darkMode ? 'text-white' : 'text-[#2B2B2B]'}`}>
-                          {displayTitle}
-                        </h3>
-                        {/* Deskripsi: 14/12 Poppins, jarak antar baris 1.5, text-justify */}
-                        <p className={`text-[12px] md:text-[14px] leading-[1.5] text-justify font-['Poppins'] ${colors.muted}`}>
-                          {displayDesc}
-                        </p>
-                      </div>
-                      
-                      {/* Alat/Tech Stack dipisah dan nggak dempet pakai flex-wrap & gap-2 */}
-                      <div className="shrink-0 mt-3 md:mt-0 flex flex-wrap gap-2 justify-start md:justify-end">
-                        {displayTech.split(',').map((tech, index) => (
-                           <span key={index} className={`inline-block px-3 py-1 text-[12px] md:text-[14px] font-bold rounded-full leading-[1.5] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#2B2B2B] text-[#FFE9EC]'}`}>
-                             {tech.trim()}
-                           </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                 <div className={`p-4 md:p-6 space-y-4 ${darkMode ? 'bg-black/40' : 'bg-[#2B2B2B]'}`}>
-  {roles.map((role: string) => (
-    <div key={`${project.id}-${role}`} className="relative rounded-xl overflow-hidden border border-[#65001E]/30 shadow-inner bg-black/20 transform-gpu">
-      
-      <div className="absolute top-4 left-4 z-20 bg-[#65001E]/90 backdrop-blur px-3 py-1.5 rounded-lg text-[12px] text-[#FFE9EC] font-bold tracking-wider border border-[#B05D76]/30 shadow-lg leading-[1.5]">
-        ROLE: {role.toUpperCase()}
-      </div>
-      
-      <div className="relative w-full aspect-video overflow-hidden bg-[#1a1a1a]">
-        {/* OVERLAY GAIB BUAT NGEBLOK KLIK */}
-        <div className="absolute inset-0 z-10 w-full h-full"></div>
-        
-        {/* Container iframe dipaksa render pakai GPU */}
-        <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] will-change-transform transform-gpu">
-         <iframe 
-    src={`${baseUrl}?current_role=${role}`} 
-    className="w-full h-full border-none" 
-    title={`Preview ${role}`}
-    sandbox="allow-scripts allow-same-origin allow-forms"
-/>
-        </div>
-      </div>
-
-    </div>
-  ))}
-</div>
-                </article>
-              );
-            })}
+            {projects.map((project) => (
+              <ProjectItem 
+                key={project.id} 
+                project={project} 
+                darkMode={darkMode} 
+                colors={colors} 
+                lang={lang} 
+                branding={branding} 
+                getText={getText} 
+              />
+            ))}
           </div>
         </div>
 
