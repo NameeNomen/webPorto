@@ -23,28 +23,25 @@ interface SkillsData {
   soft: string[];
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// KOMPONEN KHUSUS: Mengurus perputaran iframe otomatis (Dinamis dari Database)
-// ══════════════════════════════════════════════════════════════════════════
 const ProjectItem = ({ project, darkMode, colors, lang, branding, getText }: any) => {
-  // Ambil data dinamis dari database. Kalau ga ada parameter ?roles=, fallback ke ['admin']
-  const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
-  console.log("Raw demo_url dari Supabase:", project.demo_url);
   const baseUrl = project.demo_url.split('?')[0];
   
+  // 1. HARUS DEFINISIIN 'roles' DI SINI DULU!
+  const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
+  
+  // 2. State buat nyimpen index giliran
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Kalau rolenya cuma 1, timer ga usah dijalanin.
+    // Kalau rolenya cuma 1, timer ga usah jalan
     if (roles.length <= 1) return;
     
-    // Timer 40 Detik buat ganti giliran.
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % roles.length);
     }, 40000); 
 
     return () => clearInterval(timer);
-  }, [roles.length]);
+  }, [roles.length]); // Sekarang 'roles.length' udah ada definisinya
 
   const activeRole = roles[currentIndex];
   const displayTitle = getText(project, 'title');
