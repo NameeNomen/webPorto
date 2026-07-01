@@ -235,12 +235,12 @@ export default function HomePage() {
         
         {/* Container iframe dipaksa render pakai GPU */}
         <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] will-change-transform transform-gpu">
-          <iframe 
-            src={`${baseUrl}?role=${role}`} 
-            className="w-full h-full border-none" 
-            title={`Preview ${role}`}
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+         <iframe 
+    src={`${baseUrl}?current_role=${role}`} 
+    className="w-full h-full border-none" 
+    title={`Preview ${role}`}
+    sandbox="allow-scripts allow-same-origin allow-forms"
+/>
         </div>
       </div>
 
