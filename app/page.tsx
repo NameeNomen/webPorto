@@ -121,7 +121,6 @@ export default function HomePage() {
     is_multi_language: false,
     secondary_lang: 'en'
   });
-  
   const [skills, setSkills] = useState<SkillsData>({ hard: [], soft: [] });
 
   useEffect(() => {
