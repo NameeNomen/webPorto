@@ -29,6 +29,7 @@ interface SkillsData {
 const ProjectItem = ({ project, darkMode, colors, lang, branding, getText }: any) => {
   // Ambil data dinamis dari database. Kalau ga ada parameter ?roles=, fallback ke ['admin']
   const roles = project.demo_url?.match(/[?&]roles=([^&]+)/)?.[1].split(',') || ['admin'];
+  console.log("Raw demo_url dari Supabase:", project.demo_url);
   const baseUrl = project.demo_url.split('?')[0];
   
   const [currentIndex, setCurrentIndex] = useState(0);
