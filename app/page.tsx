@@ -88,15 +88,16 @@ const ProjectItem = ({ project, darkMode, colors, lang, branding, getText }: any
             <div className="absolute inset-0 z-10 w-full h-full"></div>
             
             <div className="absolute top-0 left-0 w-[133.33%] h-[133.33%] origin-top-left scale-[0.75] will-change-transform transform-gpu transition-opacity duration-300">
-              {/* DI SINI CUMA ADA 1 IFRAME! Ganti URL-nya otomatis tiap 40 detik */}
-              <iframe 
-                key={activeRole + Date.now()}
-                src={`${baseUrl}?current_role=${activeRole}`} 
-                className="w-full h-full border-none" 
-                title={`Preview ${activeRole}`}
-                sandbox="allow-scripts allow-same-origin allow-forms"
-              />
-            </div>
+    <iframe
+        {/* Hapus Date.now() supaya iframe tidak reset total */}
+        key={project.id} 
+        {/* Gunakan hash (#) agar role selamat dari redirect */}
+        src={`${baseUrl}#role=${activeRole}`}
+        className="w-full h-full border-none"
+        title={`Preview ${activeRole}`}
+        sandbox="allow-scripts allow-same-origin allow-forms"
+    />
+</div>
           </div>
         </div>
       </div>
